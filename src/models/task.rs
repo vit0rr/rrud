@@ -1,6 +1,7 @@
 use bson::{self, doc, oid::ObjectId};
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Model {
     pub task: String,
 }
@@ -8,14 +9,7 @@ pub struct Model {
 impl Model {
     pub fn to_bson(&self) -> bson::Document {
         doc! {
-            "task": &self.task,
+            "task": &self.task.to_owned(),
         }
     }
-}
-
-#[allow(non_snake_case)]
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Document {
-    pub _id: ObjectId,
-    pub task: String,
 }
