@@ -4,7 +4,7 @@ use mongodb::Client;
 use rocket::fairing::AdHoc;
 
 const DEFAULT_MONGO_URL: &'static str = "mongodb://root:root@localhost:27017";
-const DEFAULT_DB_NAME: &'static str = "test";
+const DEFAULT_DB_NAME: &'static str = "ToDo";
 
 pub async fn get_db(db_name: String) -> mongodb::error::Result<mongodb::Database> {
     let db_url = env::var("MONGO_URL").unwrap_or(DEFAULT_MONGO_URL.to_string());
