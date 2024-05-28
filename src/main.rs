@@ -1,7 +1,7 @@
-// let mut changing_thing = true;
 use mongodb::bson::{doc, Document};
 use rocket::serde::Deserialize;
 use serde_json::from_str;
+
 use serde_json::json;
 
 mod mongodb_utils;
@@ -24,21 +24,22 @@ async fn insert_task(task: String) -> String {
     let serde_task: Task<'_> = from_str(&task).unwrap();
     let task = serde_task.task;
 
-    collection
-        .insert_one(
-            doc! {
-                "task": task,
-            },
-            None,
-        )
-        .await
-        .unwrap();
-
-    return json!({
-        "status": "success",
-        "message": "Task inserted successfully",
-    })
-    .to_string();
+    match collection.insert_one(doc! { "task": task }, None).await {
+        Ok(_) => {
+            return json!({
+                "status": "success",
+                "message": "Task inserted successfully",
+            })
+            .to_string();
+        }
+        Err(e) => {
+            return json!({
+                "status": "error",
+                "message": format!("Failed to insert task: {}", e),
+            })
+            .to_string();
+        }
+    }
 }
 
 #[launch]
