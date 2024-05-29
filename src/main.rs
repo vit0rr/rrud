@@ -1,3 +1,5 @@
+use rocket::{Build, Rocket};
+
 mod db;
 mod endpoints;
 mod models;
@@ -5,7 +7,7 @@ mod models;
 extern crate rocket;
 
 #[launch]
-async fn rocket() -> _ {
+pub async fn rocket() -> Rocket<Build> {
     rocket::build()
         .attach(db::mongo::connect())
         .mount("/", routes![endpoints::task::post])

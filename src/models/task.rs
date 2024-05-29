@@ -1,4 +1,4 @@
-use bson::{self, doc, oid::ObjectId};
+use bson::{self, doc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
