@@ -10,5 +10,5 @@ extern crate rocket;
 pub async fn rocket() -> Rocket<Build> {
     rocket::build()
         .attach(db::mongo::connect())
-        .mount("/", routes![endpoints::task::post])
+        .mount("/", routes![endpoints::task::post, endpoints::task::get])
 }

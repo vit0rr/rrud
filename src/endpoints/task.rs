@@ -1,7 +1,10 @@
 use mongodb::{bson::doc, Database};
-use rocket::State;
+use rocket::{futures::StreamExt, State};
 
-use crate::{db, models};
+use crate::{
+    db,
+    models::{self, task::Schema},
+};
 
 #[post("/task", data = "<body>")]
 pub async fn post(db: &State<Database>, body: String) -> Result<String, String> {
@@ -14,4 +17,27 @@ pub async fn post(db: &State<Database>, body: String) -> Result<String, String> 
         Ok(res) => Ok(res.inserted_id.to_string()),
         Err(e) => Err(e.to_string()),
     }
+}
+
+#[get("/task")]
+pub async fn get(db: &State<Database>) -> Result<String, String> {
+    let collection = db::mongo::get_collection(db, "tasks".to_string());
+
+    let mut cursor = match collection.find(doc! {}, None).await {
+        Ok(cursor) => cursor,
+        Err(e) => return Err(e.to_string()),
+    };
+
+    let mut tasks: Vec<models::task::Schema> = Vec::new();
+
+    while let Some(result) = cursor.next().await {
+        match result {
+            Ok(document) => {
+                tasks.push(Schema::from(document));
+            }
+            Err(e) => return Err(e.to_string()),
+        }
+    }
+
+    Ok(serde_json::to_string(&tasks).unwrap())
 }
