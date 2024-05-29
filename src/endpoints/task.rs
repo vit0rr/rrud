@@ -1,4 +1,4 @@
-use mongodb::{bson::doc, Database};
+use mongodb::{bson::doc, Collection, Database};
 use rocket::{futures::StreamExt, State};
 
 use crate::{
@@ -40,4 +40,23 @@ pub async fn get(db: &State<Database>) -> Result<String, String> {
     }
 
     Ok(serde_json::to_string(&tasks).unwrap())
+}
+
+#[get("/search_task", data = "<body>")]
+pub async fn get_task(db: &State<Database>, body: String) -> Result<String, String> {
+    let collection: Collection<Schema> = db::mongo::get_collection(db, "tasks".to_string());
+
+    let task: models::task::Model = serde_json::from_str(&body).unwrap();
+
+    let task = models::task::Model { task: task.task };
+
+    let document = match collection.find_one(doc! { "task": task.task }, None).await {
+        Ok(document) => document,
+        Err(e) => return Err(e.to_string()),
+    };
+
+    match document {
+        Some(document) => Ok(document.task),
+        None => Err("Task not found".to_string()),
+    }
 }
